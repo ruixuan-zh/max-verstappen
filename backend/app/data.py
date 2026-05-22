@@ -1,4 +1,9 @@
-# Use data.gov.sg API to fetch COE information
+"""
+Data access functions for COE records.
+
+Uses data.gov.sg API to fetch COE information for the rest of the application to use.
+"""
+
 
 import requests
 

@@ -1,4 +1,4 @@
-# Backend
+# backend
 
 Python/FastAPI backend for the Singapore COE tracker and next-round predictor.
 
@@ -38,7 +38,7 @@ chronological validation split shows overfitting.
 ## Run Locally
 
 ```powershell
-cd Backend
+cd backend
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
