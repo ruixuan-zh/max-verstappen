@@ -27,7 +27,7 @@ Sources: [data.gov.sg COE dataset](https://data.gov.sg/datasets?groups=&organiza
   - `market_events`: date, source, title, event type, category impact, sentiment/pressure score, URL.
   - `forecast_runs`: model version, training window, run date, metrics.
   - `forecasts`: target bidding round, category, predicted premium, confidence band, explanation fields.
-- Backend API:
+- backend API:
   - `GET /api/coe/results`
   - `GET /api/coe/latest`
   - `GET /api/events`

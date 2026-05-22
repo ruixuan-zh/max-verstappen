@@ -11,6 +11,6 @@ Final Goal: A web app for tracking and predicting Singapore COE prices using his
 - Display relevant market and policy events
 
 ## Tech Stack (to be finalised)
-- Frontend: Next.js + React
-- Backend: Python
+- frontend: Next.js + React
+- backend: Python
 - Database: PostgreSQL
