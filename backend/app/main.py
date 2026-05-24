@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.data import fetch_all_coe_records, fetch_latest_coe_records
-from app.storage import load_raw_coe_records, raw_coe_records_exist, save_raw_coe_records
+from app.storage import load_raw_coe_records, raw_coe_records_exist, save_raw_coe_records, save_clean_coe_records
+from app.clean_data import clean_all_records
 
 NUM_OF_LATEST_RECORDS = 10
 
@@ -32,11 +33,16 @@ def get_latest():
 
 @app.post("/api/coe/backfill")
 def backfill_coe_history():
-    records = fetch_all_coe_records()
-    save_raw_coe_records(records)
+    raw_records = fetch_all_coe_records()
+    save_raw_coe_records(raw_records)
+    
+    clean_records = clean_all_records(raw_records)
+    save_clean_coe_records(clean_records)
 
     return {
         "status": "saved",
-        "count": len(records),
-        "path": "data/raw/coe_bidding_results_raw.json",
+        "raw_count": len(raw_records),
+        "clean_count": len(clean_records),
+        "raw_path": "data/raw/coe_bidding_results_raw.json",
+        "clean_path": "data/processed/coe_bidding_results_clean.json",
     }
