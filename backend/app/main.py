@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.data import fetch_all_coe_records, fetch_latest_coe_records
-from app.storage import load_raw_coe_records, raw_coe_records_exist, save_raw_coe_records, save_clean_coe_records
+from app.storage import load_clean_coe_records, clean_coe_records_exist, save_raw_coe_records, save_clean_coe_records
 from app.clean_data import clean_all_records
 
 NUM_OF_LATEST_RECORDS = 10
@@ -22,14 +22,14 @@ def get_history():
     Each record uses the app's cleaned format, with normalized categories and integer numeric fields.
     """
 
-    if not raw_coe_records_exist():
+    if not clean_coe_records_exist():
         return {
             "status": "missing_data",
             "message": "Run POST /api/coe/backfill first.",
         }
 
-    records = load_raw_coe_records()
-    return {"count": len(records), "records": clean_all_records(records)}
+    records = load_clean_coe_records()
+    return {"count": len(records), "records": records}
 
 
 @app.get("/api/coe/latest")
@@ -37,7 +37,7 @@ def get_latest():
     """
     Return the last NUM_OF_LATEST_RECORDS historical COE bidding records from gov website.
 
-    Records are loaded directly from the gov API, and not the stored data.
+    Latest records are loaded directly from the gov API, and not the stored data.
     Each record uses the app's cleaned format, with normalized categories and integer numeric fields.
     """
 
@@ -45,16 +45,12 @@ def get_latest():
     return {"count": len(records), "records": clean_all_records(records)}
 
 
-
 @app.post("/api/coe/backfill")
 def backfill_coe_history():
     """
-    Return all the historical COE bidding records from gov website.
+    Retrieve all the historical COE bidding records from gov website.
 
-    This endpoint downloads all available COE bidding records from data.gov.sg,
-    saves the raw API response for auditing/debugging, cleans the records into
-    the app's internal format, and saves the cleaned dataset for normal app use.
-
+    All records are loaded directly from the gov API, and not the stored data.
     Returns counts for both raw and cleaned records plus the local output paths.
     """
 

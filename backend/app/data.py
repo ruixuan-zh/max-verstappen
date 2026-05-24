@@ -11,7 +11,11 @@ DATA_URL = "https://data.gov.sg/api/action/datastore_search"
 COE_DATASET_ID = "d_69b3380ad7e51aff3a7dcc84eba52b8a"
 
 
-def fetch_all_coe_records():
+def fetch_all_coe_records() -> list[dict]:
+    """
+    Fetch and return all available raw COE bidding records from data.gov.sg.
+    """
+        
     all_records = []
     limit = 500
     offset = 0
@@ -45,7 +49,15 @@ def fetch_all_coe_records():
     return all_records
 
 
-def fetch_latest_coe_records(limit: int = 10):
+def fetch_latest_coe_records(limit: int = 10) -> list[dict]:
+    """
+    Fetch and return raw API records from the latest COE bidding records from data.gov.sg.
+    Records are requested in descending order by month and bidding number.
+
+    Args:
+        limit: Maximum number of raw records to fetch.
+    """
+
     params = {
         "resource_id": COE_DATASET_ID,
         "limit": limit,
