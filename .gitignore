@@ -50,6 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 backend/tests/.tmp/
+backend/.test_tmp/
 cover/
 
 # Translations

@@ -27,8 +27,8 @@ def configure_storage_paths(monkeypatch, tmp_path) -> None:
     )
 
 
-def test_save_and_load_raw_coe_records(monkeypatch, tmp_path) -> None:
-    configure_storage_paths(monkeypatch, tmp_path)
+def test_save_and_load_raw_coe_records(monkeypatch, workspace_tmp_path) -> None:
+    configure_storage_paths(monkeypatch, workspace_tmp_path)
     records = [
         {
             "month": "2026-05",
@@ -49,8 +49,8 @@ def test_save_and_load_raw_coe_records(monkeypatch, tmp_path) -> None:
     assert storage.load_raw_coe_records() == records
 
 
-def test_save_raw_coe_records_writes_metadata(monkeypatch, tmp_path) -> None:
-    configure_storage_paths(monkeypatch, tmp_path)
+def test_save_raw_coe_records_writes_metadata(monkeypatch, workspace_tmp_path) -> None:
+    configure_storage_paths(monkeypatch, workspace_tmp_path)
     records = [{"month": "2026-05"}]
 
     storage.save_raw_coe_records(records)
@@ -62,8 +62,8 @@ def test_save_raw_coe_records_writes_metadata(monkeypatch, tmp_path) -> None:
     assert "fetched_at" in metadata
 
 
-def test_save_and_load_clean_coe_records(monkeypatch, tmp_path) -> None:
-    configure_storage_paths(monkeypatch, tmp_path)
+def test_save_and_load_clean_coe_records(monkeypatch, workspace_tmp_path) -> None:
+    configure_storage_paths(monkeypatch, workspace_tmp_path)
     records = [
         {
             "month": "2026-05",
@@ -84,8 +84,8 @@ def test_save_and_load_clean_coe_records(monkeypatch, tmp_path) -> None:
     assert storage.load_clean_coe_records() == records
 
 
-def test_save_clean_coe_records_writes_metadata(monkeypatch, tmp_path) -> None:
-    configure_storage_paths(monkeypatch, tmp_path)
+def test_save_clean_coe_records_writes_metadata(monkeypatch, workspace_tmp_path) -> None:
+    configure_storage_paths(monkeypatch, workspace_tmp_path)
     records = [{"month": "2026-05"}]
 
     storage.save_clean_coe_records(records)
