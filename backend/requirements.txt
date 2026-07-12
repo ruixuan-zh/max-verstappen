@@ -1,5 +1,6 @@
 fastapi[standard]
 uvicorn[standard]
 requests
+pydantic>=2,<3
 
 pytest
