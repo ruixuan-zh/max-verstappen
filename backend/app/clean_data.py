@@ -2,6 +2,9 @@
 Clean raw data 
 """
 
+from app.schemas import CoeRecord
+
+
 def parse_int(val: str) -> int:
     cleaned_val = val.replace(",", "").strip()
     return int(cleaned_val) 
@@ -12,7 +15,7 @@ def normalize_category(val: str) -> str:
 
 
 def clean_record(record: dict) -> dict:
-    return {
+    cleaned_record = {
         "month": record["month"],
         "bidding_no": parse_int(record["bidding_no"]),
         "category": normalize_category(record["vehicle_class"]),
@@ -21,6 +24,10 @@ def clean_record(record: dict) -> dict:
         "bids_received": parse_int(record["bids_received"]),
         "premium": parse_int(record["premium"]),
     }
+
+    validated_record = CoeRecord.model_validate(cleaned_record)
+    
+    return validated_record.model_dump()
 
 
 def clean_all_records(records: list[dict]) -> list[dict]:
