@@ -75,7 +75,9 @@ def backfill_coe_history():
 @app.get("/api/coe/model/metrics")
 def get_metrics(test_fraction: Annotated[float, Query(gt=0, lt=1)] = 0.2, rolling_window: Annotated[int, Query(ge=1)] = 3):
     """
-    
+    Evaluate the baseline forecasting methods using stored COE records.
+
+    The latest chronological portion of each category is used for evaluation.
     """
 
     if not clean_coe_records_exist():
