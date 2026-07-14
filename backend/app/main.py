@@ -1,7 +1,11 @@
-from fastapi import FastAPI
+from typing import Annotated
+
+from fastapi import FastAPI, HTTPException, Query, status   
+
 from app.data import fetch_all_coe_records, fetch_latest_coe_records
 from app.storage import load_clean_coe_records, clean_coe_records_exist, save_raw_coe_records, save_clean_coe_records
 from app.clean_data import clean_all_records
+from app.evaluation import evaluate_baselines
 
 NUM_OF_LATEST_RECORDS = 10
 
@@ -67,3 +71,23 @@ def backfill_coe_history():
         "raw_path": "data/raw/coe_bidding_results_raw.json",
         "clean_path": "data/processed/coe_bidding_results_clean.json",
     }
+
+@app.get("/api/coe/model/metrics")
+def get_metrics(test_fraction: Annotated[float, Query(gt=0, lt=1)] = 0.2, rolling_window: Annotated[int, Query(ge=1)] = 3):
+    """
+    
+    """
+
+    if not clean_coe_records_exist():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Clean COE data is unavailable. "
+                "Run POST /api/coe/backfill first."
+            ),
+        )
+
+    records = load_clean_coe_records()
+
+    evaluation = evaluate_baselines(records, test_fraction=test_fraction, rolling_window=rolling_window)
+    return evaluation
