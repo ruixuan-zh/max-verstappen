@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import FastAPI, HTTPException, Query, status   
 
 from app.data import fetch_all_coe_records, fetch_latest_coe_records
+from app.schemas import BaselineMetricsResponse
 from app.storage import load_clean_coe_records, clean_coe_records_exist, save_raw_coe_records, save_clean_coe_records
 from app.clean_data import clean_all_records
 from app.evaluation import evaluate_baselines
@@ -72,7 +73,7 @@ def backfill_coe_history():
         "clean_path": "data/processed/coe_bidding_results_clean.json",
     }
 
-@app.get("/api/coe/model/metrics")
+@app.get("/api/coe/model/metrics", response_model=BaselineMetricsResponse)
 def get_metrics(test_fraction: Annotated[float, Query(gt=0, lt=1)] = 0.2, rolling_window: Annotated[int, Query(ge=1)] = 3):
     """
     Evaluate the baseline forecasting methods using stored COE records.

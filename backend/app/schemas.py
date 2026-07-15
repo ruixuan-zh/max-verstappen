@@ -37,3 +37,45 @@ class CoeRecord(BaseModel):
             raise ValueError("Successful bids cannot exceed received bids.")
 
         return self 
+
+
+class ForecastMetrics(BaseModel):
+    """
+    Represent summary measurements for a set of COE forecasts.
+    """
+
+    forecast_count: int = Field(ge=0)
+    mean_absolute_error: float = Field(ge=0)
+    mean_absolute_percentage_error: float = Field(ge=0)
+    directional_accuracy: float = Field(ge=0, le=100)
+
+
+class CategoryEvaluationMetrics(BaseModel):
+    """
+    Represent the evaluation summary for one COE category.
+    Makes use of previous class defined: Forecast Metrics
+    """
+
+    category: Literal['A', 'B', 'C', 'D', 'E']
+    training_record_count: int = Field(gt=0)
+    test_fraction: float = Field(gt=0, lt=1)
+    metrics: ForecastMetrics
+
+
+class ForecastMethodMetrics(BaseModel):
+    """
+    Represent all the metrics for each category for one forecast method.
+    """
+
+    overall_metrics: ForecastMetrics
+    categories: list[CategoryEvaluationMetrics]
+
+
+class BaselineMetricsResponse(BaseModel):
+    """
+    Represent the API response returned by endpoint containing baseline evaluation metrics.
+    """
+
+    test_fraction: float = Field(gt=0, lt=1)
+    rolling_window: int = Field(ge=1)
+    methods: dict[str, ForecastMethodMetrics]
