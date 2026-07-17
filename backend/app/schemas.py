@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 class CoeRecord(BaseModel):
     """
-    Represent one validated, cleaned COE bidding result.
+    Represent a single validated and cleaned COE bidding result.
     """
 
     model_config = ConfigDict(
@@ -25,7 +25,7 @@ class CoeRecord(BaseModel):
     bids_received: int = Field(ge=0)
     premium: int = Field(gt=0)
 
-    # Pydantic validator that runs after Pydantic has validated all the individual fields and created the CoeRecord object.
+    # Pydantic (post) validator that runs after Pydantic has validated all the individual fields and created the CoeRecord object.
     # Do not need to call manually.
     @model_validator(mode="after")
     def validate_bid_counts(self) -> Self:
@@ -42,6 +42,7 @@ class CoeRecord(BaseModel):
 class ForecastMetrics(BaseModel):
     """
     Represent summary measurements for a set of COE forecasts.
+    Summarises the quality of the forecast over a set of predictions.
     """
 
     forecast_count: int = Field(ge=0)
@@ -79,3 +80,23 @@ class BaselineMetricsResponse(BaseModel):
     test_fraction: float = Field(gt=0, lt=1)
     rolling_window: int = Field(ge=1)
     methods: dict[str, ForecastMethodMetrics]
+
+
+class CategoryPrediction(BaseModel):
+    """
+    Represent the ...
+    """
+
+    category: Literal['A', 'B', 'C', 'D', 'E']
+    latest_premium: int = Field(ge=1)
+    last_value_prediction: int = Field(ge=1)
+    rolling_average_prediction: int = Field(ge=1)
+
+
+class NextPredictionResponse(BaseModel):
+    """
+    Represent the ...
+    """
+
+    rolling_window: int = Field(ge=1)
+    predictions: list[CategoryPrediction]
