@@ -84,7 +84,7 @@ class BaselineMetricsResponse(BaseModel):
 
 class CategoryPrediction(BaseModel):
     """
-    Represent the ...
+    Represent the predictions of price for that specific category.
     """
 
     category: Literal['A', 'B', 'C', 'D', 'E']
@@ -95,7 +95,7 @@ class CategoryPrediction(BaseModel):
 
 class NextPredictionResponse(BaseModel):
     """
-    Represent the ...
+    Represent the aggregation of all the predictions for multiple categories.
     """
 
     rolling_window: int = Field(ge=1)

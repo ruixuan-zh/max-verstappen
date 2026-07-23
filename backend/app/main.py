@@ -96,5 +96,30 @@ def get_metrics(test_fraction: Annotated[float, Query(gt=0, lt=1)] = 0.2, rollin
     evaluation = evaluate_baselines(records, test_fraction=test_fraction, rolling_window=rolling_window)
     return evaluation
 
-# TODO
-@app.get("/api/coe/predictions/next") 
+@app.get("/api/coe/predictions/next", response_model=NextPredictionResponse)
+def get_next_predictions(rolling_window: Annotated[int, Query(ge=1)] = 3):
+    """
+    Return the next predictions in NextPredictionResponse format
+    """
+    
+    if not clean_coe_records_exist():
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Clean COE data is unavailable. Run backfill: POST /api/coe/backfill first.")
+        
+    predictions = []
+    records = load_clean_coe_records()
+    for category in ("A", "B", "C", "D", "E"):
+        latest = last_value_forecast(records, category)
+        predictions.append(
+            {
+                "category": category,
+                "latest_premium": latest,
+                "last_value_prediction": latest,
+                "rolling_average_prediction": rolling_average_forecast(records, category, rolling_window)
+            }
+        )
+        
+    return {
+        "rolling_window": rolling_window,
+            "predictions": predictions
+    }
+    

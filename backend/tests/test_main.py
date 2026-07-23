@@ -48,6 +48,35 @@ def make_clean_record(
     }
 
 
+def make_prediction_records() -> list[dict]:
+    """
+    Return four chronological bidding records for every COE category.
+    """
+
+    records = []
+    bidding_rounds = [
+        ("2026-04", 1, 0),
+        ("2026-04", 2, 1000),
+        ("2026-05", 1, 2000),
+        ("2026-05", 2, 3000),
+    ]
+
+    for category_index, category in enumerate(("A", "B", "C", "D", "E")):
+        base_premium = 100000 + category_index * 10000
+
+        for month, bidding_no, premium_increase in bidding_rounds:
+            records.append(
+                make_clean_record(
+                    month=month,
+                    bidding_no=bidding_no,
+                    category=category,
+                    premium=base_premium + premium_increase,
+                )
+            )
+
+    return records
+
+
 def test_health_check_returns_ok() -> None:
     response = client.get("/health")
 
@@ -129,3 +158,67 @@ def test_backfill_fetches_saves_cleans_and_reports_counts(monkeypatch) -> None:
         make_clean_record(month="2026-05", bidding_no=1, category="A"),
         make_clean_record(month="2026-05", bidding_no=2, category="B"),
     ]
+
+
+def test_get_next_predictions_returns_service_unavailable_when_data_is_missing(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(main, "clean_coe_records_exist", lambda: False)
+
+    response = client.get("/api/coe/predictions/next")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": (
+            "Clean COE data is unavailable. "
+            "Run backfill: POST /api/coe/backfill first."
+        ),
+    }
+
+
+def test_get_next_predictions_uses_default_window_and_returns_all_categories(
+    monkeypatch,
+) -> None:
+    records = make_prediction_records()
+    monkeypatch.setattr(main, "clean_coe_records_exist", lambda: True)
+    monkeypatch.setattr(main, "load_clean_coe_records", lambda: records)
+
+    response = client.get("/api/coe/predictions/next")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "rolling_window": 3,
+        "predictions": [
+            {
+                "category": category,
+                "latest_premium": 103000 + category_index * 10000,
+                "last_value_prediction": 103000 + category_index * 10000,
+                "rolling_average_prediction": 102000 + category_index * 10000,
+            }
+            for category_index, category in enumerate(("A", "B", "C", "D", "E"))
+        ],
+    }
+
+
+def test_get_next_predictions_accepts_custom_window_of_one(monkeypatch) -> None:
+    records = make_prediction_records()
+    monkeypatch.setattr(main, "clean_coe_records_exist", lambda: True)
+    monkeypatch.setattr(main, "load_clean_coe_records", lambda: records)
+
+    response = client.get("/api/coe/predictions/next?rolling_window=1")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["rolling_window"] == 1
+
+    for prediction in body["predictions"]:
+        assert (
+            prediction["rolling_average_prediction"]
+            == prediction["latest_premium"]
+        )
+
+
+def test_get_next_predictions_rejects_non_positive_window() -> None:
+    response = client.get("/api/coe/predictions/next?rolling_window=0")
+
+    assert response.status_code == 422
